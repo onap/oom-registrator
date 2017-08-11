@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+
+	<parent>
+	<groupId>org.onap.oom.registrator</groupId>
+	<artifactId>oom-registrator-parent</artifactId>
+	 <version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+
+	<groupId>org.onap.oom.registrator</groupId>
+	<artifactId>kube2consul</artifactId>
+	 <version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	
+	<properties>
+		<app.exec.name>kube2consul</app.exec.name>
+	</properties>
+ 	 
+	<build>
+		<sourceDirectory>${basedir}${file.separator}src</sourceDirectory>
+		<directory>${basedir}${file.separator}bin</directory>
+		<plugins>
+			<plugin>
+				<groupId>com.igormaznitsa</groupId>
+				<artifactId>mvn-golang-wrapper</artifactId> 	 			
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-resources-dockerfile</id>                 
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>            
+							<outputDirectory>${version.output}</outputDirectory>
+							<includeEmptyDirs>true</includeEmptyDirs>
+							<resources>     
+								<resource>
+									<directory>${dockerFileDir}</directory>
+									<filtering>false</filtering>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>  
+							</resources>
+							<overwrite>true</overwrite>
+						</configuration>
+					</execution>  
+					<execution>
+						<id>copy-resources-blueprint</id>                 
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>            
+							<outputDirectory>${version.output}/blueprint</outputDirectory>
+							<includeEmptyDirs>true</includeEmptyDirs>
+							<resources>     
+								<resource>
+									<directory>${blueprintFileDir}</directory>
+									<filtering>false</filtering>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>  
+							</resources>
+							<overwrite>true</overwrite>
+						</configuration>
+					</execution>    
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copytolinux64</id>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<phase>prepare-package</phase>
+						<configuration>
+							<artifactItems>   
+								<artifactItem>
+					 	 		<groupId>com.zte.ums.zenap.msb.components</groupId>
+					 	 		<artifactId>consul</artifactId>
+					 	 		<type>tar.gz</type>
+					 	 		<classifier>linux_amd64</classifier>            
+								</artifactItem>                          
+							</artifactItems> 	
+							<outputDirectory>${version.output}</outputDirectory>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
+							<stripVersion>true</stripVersion>
+							<outputAbsoluteArtifactFilename>true</outputAbsoluteArtifactFilename>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin> 
+		</plugins>
+	</build>
+
+</project>

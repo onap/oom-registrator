@@ -1,0 +1,118 @@
+---
+- name: remove kube2consul container
+  docker:
+    name: kube2consul
+    image: "{{kube2consul_image}}"
+    state: absent 
+
+- name: run kube2consul container
+  docker:
+    name: kube2consul
+    image: "{{kube2consul_image}}"
+    log_driver: syslog
+    net: host
+    restart_policy: always
+    volumes:
+    - "{{ kube2consul_data_host }}:{{ kube2consul_data_container }}"
+    env:
+      KUBE_MASTER_IP: "{{kube_master_ip}}"
+      PDM_CONTROLLER_IP: "{{pdm_controller_ip}}"
+      JOIN_IP: "{{consul_join_ip}}"
+  when:
+    - all_in_one == 'no'
+    - master_in_controller == 'no'
+    - cluster_type == 'k8s'
+
+- name: run kube2consul container
+  docker:
+    name: kube2consul
+    image: "{{kube2consul_image}}"
+    net: host
+    restart_policy: always
+    privileged: true
+    volumes:
+    - "{{ kube2consul_data_host }}:{{ kube2consul_data_container }}"
+    - "/root/.kube/config:/root/.kube/config:ro"
+    env:
+      KUBE_MASTER_IP: "{{kube_master_ip}}"
+      PDM_CONTROLLER_IP: "{{pdm_controller_ip}}"
+      JOIN_IP: "{{consul_join_ip}}"
+      CLUSTER_TYPE: "openshift"
+  when:
+    - all_in_one == 'no'
+    - master_in_controller == 'no'
+    - cluster_type == 'openshift'
+
+- name: run kube2consul container
+  docker:
+    name: kube2consul
+    image: "{{kube2consul_image}}"
+    log_driver: syslog
+    restart_policy: always
+    volumes:
+    - "{{ kube2consul_data_host }}:{{ kube2consul_data_container }}"
+    env:
+      KUBE_MASTER_IP: "{{kube_master_ip}}"
+      PDM_CONTROLLER_IP: "{{pdm_controller_ip}}"
+      JOIN_IP: "{{consul_join_ip}}"
+      ALL_IN_ONE: "yes"
+  when:
+    - all_in_one == 'yes'
+    - cluster_type == 'k8s'
+
+- name: run kube2consul container
+  docker:
+    name: kube2consul
+    image: "{{kube2consul_image}}"
+    log_driver: syslog
+    restart_policy: always
+    privileged: true
+    volumes:
+    - "{{ kube2consul_data_host }}:{{ kube2consul_data_container }}"
+    - "/root/.kube/config:/root/.kube/config:ro"
+    env:
+      KUBE_MASTER_IP: "{{kube_master_ip}}"
+      PDM_CONTROLLER_IP: "{{pdm_controller_ip}}"
+      JOIN_IP: "{{consul_join_ip}}"
+      ALL_IN_ONE: "yes"
+      CLUSTER_TYPE: "openshift"
+  when:
+    - all_in_one == 'yes'
+    - cluster_type == 'openshift'
+
+- name: run kube2consul container
+  docker:
+    name: kube2consul
+    image: "{{kube2consul_image}}"
+    log_driver: syslog
+    restart_policy: always
+    volumes:
+    - "{{ kube2consul_data_host }}:{{ kube2consul_data_container }}"
+    env:
+      KUBE_MASTER_IP: "{{kube_master_ip}}"
+      PDM_CONTROLLER_IP: "{{pdm_controller_ip}}"
+      JOIN_IP: "{{consul_join_ip}}"
+      ALL_IN_ONE: "yes"
+  when:
+    - master_in_controller == 'yes'
+    - cluster_type == 'k8s'
+
+- name: run kube2consul container
+  docker:
+    name: kube2consul
+    image: "{{kube2consul_image}}"
+    log_driver: syslog
+    restart_policy: always
+    privileged: true
+    volumes:
+    - "{{ kube2consul_data_host }}:{{ kube2consul_data_container }}"
+    - "/root/.kube/config:/root/.kube/config:ro"
+    env:
+      KUBE_MASTER_IP: "{{kube_master_ip}}"
+      PDM_CONTROLLER_IP: "{{pdm_controller_ip}}"
+      JOIN_IP: "{{consul_join_ip}}"
+      ALL_IN_ONE: "yes"
+      CLUSTER_TYPE: "openshift"
+  when:
+    - master_in_controller == 'yes'
+    - cluster_type == 'openshift'
