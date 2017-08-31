@@ -1,8 +1,0 @@
----
-- remote_user: ubuntu
-  become: yes
-  become_method: sudo
-  vars_files:
-  - vars.yml
-  tasks:
-  - include: task.yml
