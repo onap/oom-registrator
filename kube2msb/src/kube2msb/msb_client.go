@@ -53,53 +53,63 @@ func newMSBAgent(s string) (*MSBAgent, error) {
 
 func (client *MSBAgent) Register(serviceInfo string) {
 	var (
-		sa = &ServiceAnnotation{}
+		sas = []*ServiceAnnotation{}
 	)
-	err := json.Unmarshal([]byte(serviceInfo), sa)
+	err := json.Unmarshal([]byte(serviceInfo), &sas)
 	if err != nil {
 		log.Printf("Failed to Unmarshal serviceInfo to ServiceAnnotation:%v", err)
 		return
 	}
 
-	su := ServiceAnnotation2ServiceUnit(sa)
-	body, _ := json.Marshal(su)
-	postURL := client.url + urlPrefix
+	for _, sa := range sas {
+		su := ServiceAnnotation2ServiceUnit(sa)
+		body, _ := json.Marshal(su)
+		postURL := client.url + urlPrefix
 
-	resp, err := http.Post(postURL, "application/json", bytes.NewReader(body))
-	if err != nil {
-		log.Printf("Failed to do a request:%v", err)
-		return
+		resp, err := http.Post(postURL, "application/json", bytes.NewReader(body))
+		if err != nil {
+			log.Printf("Failed to do a request:%v", err)
+			return
+		}
+
+		log.Printf("Http request to register service:%s returned code:%d", su.Name, resp.StatusCode)
 	}
-
-	log.Printf("Http request to register service:%s returned code:%d", su.Name, resp.StatusCode)
 }
 
 func (client *MSBAgent) DeRegister(serviceInfo string) {
 	var (
-		sa = &ServiceAnnotation{}
+		sas = []*ServiceAnnotation{}
 	)
 
-	err := json.Unmarshal([]byte(serviceInfo), sa)
+	err := json.Unmarshal([]byte(serviceInfo), &sas)
 	if err != nil {
 		log.Printf("Failed to Unmarshal serviceInfo to ServiceAnnotation:%v", err)
 		return
 	}
 
-	deleteURL := client.url + urlPrefix + "/" + sa.ServiceName + "/version/" + sa.Version + "/nodes/" + sa.IP + "/" + sa.Port
+	for _, sa := range sas {
+		var deleteURL string
+		if sa.Version == "" {
+			deleteURL = client.url + urlPrefix + "/" + sa.ServiceName + "/version/" + "null" + "/nodes/" + sa.IP + "/" + sa.Port
+		} else {
+			deleteURL = client.url + urlPrefix + "/" + sa.ServiceName + "/version/" + sa.Version + "/nodes/" + sa.IP + "/" + sa.Port
+		}
+		log.Printf("deleteURL:%s", deleteURL)
+		req, err := http.NewRequest("DELETE", deleteURL, nil)
+		if err != nil {
+			log.Printf("(deleteURL:%s) failed to NewRequest:%v", deleteURL, err)
+			return
+		}
 
-	req, err := http.NewRequest("DELETE", deleteURL, nil)
-	if err != nil {
-		log.Printf("(deleteURL:%s) failed to NewRequest:%v", deleteURL, err)
-		return
-	}
+		c := &http.Client{}
+		resp, err := c.Do(req)
+		if err != nil {
+			log.Printf("(deleteURL:%s) failed to do a request:%v", deleteURL, err)
+			return
+		}
 
-	c := &http.Client{}
-	resp, err := c.Do(req)
-	if err != nil {
-		log.Printf("(deleteURL:%s) failed to do a request:%v", deleteURL, err)
-		return
+		log.Printf("Http request to deregister service:%s returned code:%d", sa.ServiceName, resp.StatusCode)
 	}
-	log.Printf("Http request to deregister service:%s returned code:%d", sa.ServiceName, resp.StatusCode)
 }
 
 func ServiceAnnotation2ServiceUnit(sa *ServiceAnnotation) *ServiceUnit {
