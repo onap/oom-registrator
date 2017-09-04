@@ -1,9 +1,10 @@
 #!/bin/sh
+WORKSPACE=/d/onap/registrator
 dockerRegistry=nexus3.onap.org:10003
 appName=onap/oom/kube2msb
 appVersion=latest
 
-homeDir=$WORKSPACE/kube2msb
+homeDir=$WORKSPACE
 
 buildDir=$homeDir/build
 dockerDir=$buildDir/docker
