@@ -7,6 +7,8 @@ target/
 /archives/
 workDir/
 bin/
+release/
+pkg/
 *.jar
 *.zip
 *.tar
