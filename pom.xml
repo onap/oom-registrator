@@ -23,7 +23,7 @@
   <version>1.0.0-SNAPSHOT</version>
   <packaging>mvn-golang</packaging>
 
-  <name>Kube2msb Registrator</name>
+  <name>oom-registrator</name>
   <description>Kube2msb registrator listens kubernetes events and register onap microservices to MSB.</description>
   
   <build>
