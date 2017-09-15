@@ -133,4 +133,5 @@ type ServiceAnnotation struct {
 	Protocol    string `json:"protocol,omitempty"`
 	LBPolicy    string `json:"lb_policy,omitempty"`
 	VisualRange string `json:"visualRange,omitempty"`
+	Path        string `json:"path,omitempty"`
 }
