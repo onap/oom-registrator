@@ -92,6 +92,11 @@ func newKubeClient() (*kclient.Client, error) {
 	overrides := &kclientcmd.ConfigOverrides{}
 	overrides.ClusterInfo.Server = masterUrl
 
+	if token, present := os.LookupEnv("AUTH_TOKEN"); present {
+		overrides.AuthInfo.Token = token
+		overrides.ClusterInfo.InsecureSkipTLSVerify = true
+	}
+
 	rules := kclientcmd.NewDefaultClientConfigLoadingRules()
 	kubeConfig, err := kclientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, overrides).ClientConfig()
 
