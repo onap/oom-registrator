@@ -125,6 +125,7 @@ func ServiceAnnotation2ServiceUnit(sa *ServiceAnnotation) *ServiceUnit {
 		LBPolicy:    sa.LBPolicy,
 		VisualRange: sa.VisualRange,
 		Path:        sa.Path,
+		EnableSSL:   sa.EnableSSL,
 		Instances:   []InstanceUnit{{ServiceIP: sa.IP, ServicePort: sa.Port}},
 	}
 }

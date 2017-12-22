@@ -134,4 +134,5 @@ type ServiceAnnotation struct {
 	LBPolicy    string `json:"lb_policy,omitempty"`
 	VisualRange string `json:"visualRange,omitempty"`
 	Path        string `json:"path,omitempty"`
+	EnableSSL   bool   `json:"enable_ssl"`
 }
