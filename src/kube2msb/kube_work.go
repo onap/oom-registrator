@@ -178,7 +178,7 @@ func (client *ClientBookKeeper) RemovePod(pod *kapi.Pod) {
 	client.msbQueue <- MSBWork{
 		Action:      MSBWorkRemovePod,
 		ServiceInfo: pod.Annotations[serviceKey],
-		IPAddress:   pod.Status.PodIP,
+		IPAddress:    client.pods[pod.Name].Status.PodIP,
 	}
 	delete(client.pods, pod.Name)
 	log.Println("Queued Pod to be removed: ", pod.Name)
