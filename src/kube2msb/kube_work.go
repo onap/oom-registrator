@@ -60,19 +60,12 @@ func (client *ClientBookKeeper) AddService(svc *kapi.Service) {
 	}
 
 	if kapi.IsServiceIPSet(svc) {
-		if svc.Spec.Type == kapi.ServiceTypeClusterIP || svc.Spec.Type == kapi.ServiceTypeNodePort {
+		if svc.Spec.Type == kapi.ServiceTypeClusterIP || svc.Spec.Type == kapi.ServiceTypeNodePort || svc.Spec.Type == kapi.ServiceTypeLoadBalancer {
 			log.Printf("Adding %s service:%s", svc.Spec.Type, svc.Name)
 			client.msbQueue <- MSBWork{
 				Action:      MSBWorkAddService,
 				ServiceInfo: svc.ObjectMeta.Annotations[serviceKey],
 				IPAddress:   svc.Spec.ClusterIP,
-			}
-		} else if svc.Spec.Type == kapi.ServiceTypeLoadBalancer {
-			log.Println("Adding LoadBalancerIP service:", svc.Name)
-			client.msbQueue <- MSBWork{
-				Action:      MSBWorkAddService,
-				ServiceInfo: svc.ObjectMeta.Annotations[serviceKey],
-				IPAddress:   svc.Spec.LoadBalancerIP,
 			}
 		} else {
 			log.Printf("Service Type:%s for Service:%s is not supported", svc.Spec.Type, svc.Name)
@@ -178,7 +171,7 @@ func (client *ClientBookKeeper) RemovePod(pod *kapi.Pod) {
 	client.msbQueue <- MSBWork{
 		Action:      MSBWorkRemovePod,
 		ServiceInfo: pod.Annotations[serviceKey],
-		IPAddress:    client.pods[pod.Name].Status.PodIP,
+		IPAddress:   client.pods[pod.Name].Status.PodIP,
 	}
 	delete(client.pods, pod.Name)
 	log.Println("Queued Pod to be removed: ", pod.Name)
