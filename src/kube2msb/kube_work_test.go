@@ -218,3 +218,32 @@ func TestAddPodKube(t *testing.T) {
 	}
 
 }
+
+
+func TestRemovePodKube(t *testing.T) {
+	client := newClientBookKeeper()
+	msbWorkQueue := make(chan MSBWork, 10)
+	client.msbQueue = msbWorkQueue
+
+	// exception process
+	// TODO ServiceKey not set , cannot check result for there would be no return
+	podWithoutServiceKey := kapi.Pod{}
+	client.RemovePod(&podWithoutServiceKey)
+
+	// TODO Pod not exist , cannot check result for there would be no return
+	podNotExist := createMockPod("podNotExistTest", "192.168.10.10")
+	client.RemovePod(podNotExist)
+
+	// normal process
+	pod := createMockPod("removePodTest", "192.168.10.10")
+	client.AddPod(pod)
+	if _, ok := client.pods[pod.Name]; !ok {
+		t.Errorf("add pod error, pod not exists in client.pods")
+	}
+	msbWorkPodValidate(t, msbWorkQueue, pod, MSBWorkAddPod)
+	client.RemovePod(pod)
+	msbWorkPodValidate(t, msbWorkQueue, pod, MSBWorkRemovePod)
+	if _, ok := client.pods[pod.Name]; ok {
+		t.Errorf("remove pod error, pod still exists in client.pods")
+	}
+}
