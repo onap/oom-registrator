@@ -219,7 +219,6 @@ func TestAddPodKube(t *testing.T) {
 
 }
 
-
 func TestRemovePodKube(t *testing.T) {
 	client := newClientBookKeeper()
 	msbWorkQueue := make(chan MSBWork, 10)
@@ -245,5 +244,44 @@ func TestRemovePodKube(t *testing.T) {
 	msbWorkPodValidate(t, msbWorkQueue, pod, MSBWorkRemovePod)
 	if _, ok := client.pods[pod.Name]; ok {
 		t.Errorf("remove pod error, pod still exists in client.pods")
+	}
+}
+
+func TestUpdatePodKube(t *testing.T) {
+	client := newClientBookKeeper()
+	msbWorkQueue := make(chan MSBWork, 10)
+	client.msbQueue = msbWorkQueue
+
+	// exception process
+	// TODO ServiceKey not set , cannot check result for there would be no return
+	podWithoutServiceKey := kapi.Pod{}
+	client.UpdatePod(&podWithoutServiceKey)
+
+	// normal process
+	// update exist Pod
+	existPod := createMockPod("mockPod", "192.168.10.11")
+	client.AddPod(existPod)
+	msbWorkPodValidate(t, msbWorkQueue, existPod, MSBWorkAddPod)
+	if _, ok := client.pods[existPod.Name]; !ok {
+		t.Errorf("add pod error, pod not exists in client.pods")
+	}
+	// update service info
+	existPod.Status.PodIP = "0.0.0.0"
+	client.UpdatePod(existPod)
+	msbWorkPodValidate(t, msbWorkQueue, existPod, MSBWorkRemovePod)
+	msbWorkPodValidate(t, msbWorkQueue, existPod, MSBWorkAddPod)
+	if updatedExistPod, ok := client.pods[existPod.Name]; !ok || updatedExistPod.Status.PodIP != existPod.Status.PodIP {
+		t.Errorf("add pod error, pod not exists in client.pods")
+	}
+
+	// update not exist service
+	notExistPod := createMockPod("mockNotExistPod", "192.168.10.11")
+	if _, ok := client.pods[notExistPod.Name]; ok {
+		t.Errorf("mockNotExistPod should not exist before it has been added")
+	}
+	client.UpdatePod(notExistPod)
+	msbWorkPodValidate(t, msbWorkQueue, notExistPod, MSBWorkAddPod)
+	if _, ok := client.pods[notExistPod.Name]; !ok {
+		t.Errorf("mockNotExistPod should not exist before it has been added")
 	}
 }
