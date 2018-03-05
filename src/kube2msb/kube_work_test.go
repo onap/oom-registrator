@@ -160,3 +160,61 @@ func TestUpdateServiceKube(t *testing.T) {
 	client.UpdateService(notExistService)
 	msbWorkValidate(t, msbWorkQueue, notExistService, MSBWorkAddService, "192.168.10.12")
 }
+
+func createMockPod(name string, ip string) *kapi.Pod {
+	pod := kapi.Pod{
+		Status: kapi.PodStatus{
+			PodIP: ip,
+		},
+	}
+
+	pod.Name = name
+	pod.Annotations = map[string]string{serviceKey: name}
+
+	return &pod
+}
+
+func msbWorkPodValidate(t *testing.T, queue <-chan MSBWork, pod *kapi.Pod, action MSBWorkAction) {
+	work := <-queue
+
+	if work.Action != action || work.IPAddress != pod.Status.PodIP || work.ServiceInfo != pod.Name {
+		t.Errorf("expect %s,%s,%s to be %s %s,%s",
+			work.Action, work.IPAddress, work.ServiceInfo, action, pod.Status.PodIP, pod.Name)
+	}
+}
+
+func TestAddPodKube(t *testing.T) {
+	client := newClientBookKeeper()
+	msbWorkQueue := make(chan MSBWork, 10)
+	client.msbQueue = msbWorkQueue
+
+	// add ServiceTypeClusterIP
+	pod := createMockPod("addPodTest", "192.168.10.10")
+	client.AddPod(pod)
+	msbWorkPodValidate(t, msbWorkQueue, pod, MSBWorkAddPod)
+	if _, ok := client.pods[pod.Name]; !ok {
+		t.Errorf("add pod error, pod not exists in client.pods")
+	}
+
+	// exception process
+	// TODO servicekey is not set , cannot check result for there would be no return
+	podWithoutServiceKey := &kapi.Pod{}
+	client.AddPod(podWithoutServiceKey)
+
+	// TODO pod already exist , cannot check result for there would be no return
+	client.AddPod(pod)
+
+	// pod.Name == "" || pod.Status.PodIP == ""
+	podWithoutName := createMockPod("", "192.168.10.10")
+	client.AddPod(podWithoutName)
+	if addedPod, ok := addMap[podWithoutName.Name]; !ok || addedPod.Status.PodIP != podWithoutName.Status.PodIP {
+		t.Errorf("podWithoutName didnot add to addMap")
+	}
+
+	podWithoutIp := createMockPod("podWithoutIp", "")
+	client.AddPod(podWithoutIp)
+	if addedPod, ok := addMap[podWithoutIp.Name]; !ok || addedPod.Status.PodIP != podWithoutIp.Status.PodIP {
+		t.Errorf("podWithoutIp didnot add to addMap")
+	}
+
+}
