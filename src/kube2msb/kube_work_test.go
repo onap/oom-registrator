@@ -85,3 +85,47 @@ func msbWorkValidate(t *testing.T, queue <-chan MSBWork, service *kapi.Service, 
 			work.Action, work.IPAddress, work.ServiceInfo, action, ip, service.Name)
 	}
 }
+
+func removeSingleServiceTest(t *testing.T, client *ClientBookKeeper, queue <-chan MSBWork, service *kapi.Service, ip string) {
+	// add service
+	client.AddService(service)
+	msbWorkValidate(t, queue, service, MSBWorkAddService, ip)
+
+	// remove service
+	client.RemoveService(service)
+	msbWorkValidate(t, queue, service, MSBWorkRemoveService, ip)
+}
+
+func TestRemoveServiceKube(t *testing.T) {
+	client := newClientBookKeeper()
+	msbWorkQueue := make(chan MSBWork, 10)
+	client.msbQueue = msbWorkQueue
+
+	// exception process
+	// TODO ServiceKey not set , cannot check result for there would be no return
+	serviceWithoutServiceKey := kapi.Service{
+		ObjectMeta: kapi.ObjectMeta{
+			Annotations: map[string]string{},
+		},
+	}
+	client.RemoveService(&serviceWithoutServiceKey)
+
+	// TODO service not exist , cannot check result for there would be no return
+	serviceNotExist := createMockService("serviceTypeClusterIP", "192.168.10.9", kapi.ServiceTypeClusterIP)
+	serviceNotExist.Name = "serviceNotExist"
+	client.RemoveService(serviceNotExist)
+
+	// normal process
+	// ServiceTypeClusterIP
+	serviceClusterIp := createMockService("serviceTypeClusterIP", "192.168.10.10", kapi.ServiceTypeClusterIP)
+	removeSingleServiceTest(t, client, msbWorkQueue, serviceClusterIp, "192.168.10.10")
+
+	// ServiceTypeNodePort
+	serviceNodePort := createMockService("ServiceTypeNodePort", "192.168.10.11", kapi.ServiceTypeNodePort)
+	removeSingleServiceTest(t, client, msbWorkQueue, serviceNodePort, "192.168.10.11")
+
+	// ServiceTypeLoadBalancer
+	serviceLoadBalancer := createMockService("serviceTypeClusterIP", "192.168.10.12", kapi.ServiceTypeLoadBalancer)
+	serviceLoadBalancer.Spec.LoadBalancerIP = "192.168.10.12"
+	removeSingleServiceTest(t, client, msbWorkQueue, serviceLoadBalancer, "192.168.10.12")
+}
