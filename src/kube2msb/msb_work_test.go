@@ -84,6 +84,74 @@ func TestAddPodMsb(t *testing.T) {
 	addServiceOrPodTest(t, "Pod")
 }
 
+func removeServiceOrPodTest(t *testing.T, removeType string) {
+	cases := []struct{ url, ip, serviceInfo string }{
+		{ // Version is ""
+			urlPrefix + "/resgisterTest1/version/null/nodes/192.168.1.10/8080",
+			"192.168.1.10",
+			`[{
+				"port":"8080",
+				"serviceName":"resgisterTest1",
+				"version":"",
+				"url":"/register/test",
+				"protocol":"http",
+				"lb_policy":"random",
+				"visualRange":"1",
+				"path":"rt",
+				"enable_ssl":true
+			}]`,
+		}, { // version is not ""
+			urlPrefix + "/resgisterTest2/version/v1/nodes/192.168.1.10/8080",
+			"192.168.1.10",
+			`[{
+				"port":"8080",
+				"serviceName":"resgisterTest2",
+				"version":"v1",
+				"url":"/register/test",
+				"protocol":"http",
+				"lb_policy":"random",
+				"visualRange":"1",
+				"path":"rt",
+				"enable_ssl":true
+			}]`,
+		},
+	}
+
+	for _, c := range cases {
+		handler := func(res http.ResponseWriter, req *http.Request) {
+			if req.Method != "DELETE" {
+				t.Errorf("DeRegister() request method should be 'DELETE' not %s", req.Method)
+			} else if c.url != req.URL.String() {
+				t.Errorf("DeRegister() url should be %s, not %s", c.url, req.URL)
+			} else {
+				res.WriteHeader(200)
+				res.Header().Set("Content-Type", "application/xml")
+				fmt.Fprintln(res, "deregist success")
+			}
+
+		}
+		server := httptest.NewServer(http.HandlerFunc(handler))
+		defer server.Close()
+
+		client := MSBAgentWorker{
+			agent: &MSBAgent{
+				url: server.URL,
+			},
+		}
+
+		if removeType == "Service" {
+			client.RemoveService(c.ip, c.serviceInfo)
+		} else if removeType == "Pod" {
+			client.RemovePod(c.ip, c.serviceInfo)
+		}
+	}
+
+}
+
+func TestRemoveServiceMsb(t *testing.T) {
+	removeServiceOrPodTest(t, "Service")
+}
+
 func TestMergeIP(t *testing.T) {
 	cases := []struct{ ip, sInfo, want string }{
 		{"127.0.0.1", "{}", "{\"ip\":\"127.0.0.1\",}"},
