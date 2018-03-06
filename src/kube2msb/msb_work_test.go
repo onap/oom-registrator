@@ -152,6 +152,10 @@ func TestRemoveServiceMsb(t *testing.T) {
 	removeServiceOrPodTest(t, "Service")
 }
 
+func TestRemovePodMsb(t *testing.T) {
+	removeServiceOrPodTest(t, "Pod")
+}
+
 func TestMergeIP(t *testing.T) {
 	cases := []struct{ ip, sInfo, want string }{
 		{"127.0.0.1", "{}", "{\"ip\":\"127.0.0.1\",}"},
