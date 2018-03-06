@@ -24,7 +24,7 @@ import (
 	"testing"
 )
 
-func TestAddServiceMsb(t *testing.T) {
+func addServiceOrPodTest(t *testing.T, addType string) {
 	handler := func(res http.ResponseWriter, req *http.Request) {
 		if req.Method != "POST" {
 			t.Errorf("Register() request method should be 'Post' not %s", req.Method)
@@ -69,7 +69,19 @@ func TestAddServiceMsb(t *testing.T) {
 		"enable_ssl":true
 	}]`
 
-	client.AddService("192.168.1.10", serviceInfo)
+	if addType == "Service" {
+		client.AddService("192.168.1.10", serviceInfo)
+	} else {
+		client.AddPod("192.168.1.10", serviceInfo)
+	}
+}
+
+func TestAddServiceMsb(t *testing.T) {
+	addServiceOrPodTest(t, "Service")
+}
+
+func TestAddPodMsb(t *testing.T) {
+	addServiceOrPodTest(t, "Pod")
 }
 
 func TestMergeIP(t *testing.T) {
