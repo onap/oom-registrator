@@ -16,8 +16,61 @@ limitations under the License.
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 )
+
+func TestAddServiceMsb(t *testing.T) {
+	handler := func(res http.ResponseWriter, req *http.Request) {
+		if req.Method != "POST" {
+			t.Errorf("Register() request method should be 'Post' not %s", req.Method)
+		} else if urlPrefix != req.URL.String() {
+			t.Errorf("Register() url should be %s, not %s", urlPrefix, req.URL)
+		} else {
+			body, err := ioutil.ReadAll(req.Body)
+			if err != nil {
+				t.Errorf("Register() fail to read request body")
+			}
+			var su = ServiceUnit{}
+			parseError := json.Unmarshal([]byte(body), &su)
+			if parseError != nil {
+				t.Errorf("Register() request body can not parse to ServiceUnit, %s", body)
+				return
+			} else {
+				res.WriteHeader(200)
+				res.Header().Set("Content-Type", "application/xml")
+				fmt.Fprintln(res, "regist success")
+			}
+		}
+
+	}
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	client := MSBAgentWorker{
+		agent: &MSBAgent{
+			url: server.URL,
+		},
+	}
+
+	serviceInfo := `[{
+		"port":"8080",
+		"serviceName":"resgisterTest",
+		"version":"v1",
+		"url":"/register/test",
+		"protocol":"http",
+		"lb_policy":"random",
+		"visualRange":"1",
+		"path":"rt",
+		"enable_ssl":true
+	}]`
+
+	client.AddService("192.168.1.10", serviceInfo)
+}
 
 func TestMergeIP(t *testing.T) {
 	cases := []struct{ ip, sInfo, want string }{
