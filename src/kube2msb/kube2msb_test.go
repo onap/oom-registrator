@@ -18,6 +18,8 @@ package main
 import (
 	"os"
 	"testing"
+
+	kapi "k8s.io/kubernetes/pkg/api"
 )
 
 func urlFormateValidate(t *testing.T, method string) {
@@ -65,4 +67,25 @@ func TestGetMSBUrl(t *testing.T) {
 
 func TestGetKubeMasterUrl(t *testing.T) {
 	urlFormateValidate(t, "getKubeMasterUrl")
+}
+
+func TestSendServiceWork(t *testing.T) {
+
+	kubeWorkQueue := make(chan KubeWork, 1)
+	serviceObj := kapi.Service{}
+
+	cases := []KubeWorkAction{
+		KubeWorkAddService,
+		KubeWorkRemoveService,
+		KubeWorkUpdateService,
+	}
+
+	for _, c := range cases {
+		sendServiceWork(c, kubeWorkQueue, &serviceObj)
+		got := <-kubeWorkQueue
+
+		if got.Action != c {
+			t.Errorf("sendServiceWork(%action, queue, service) got %gotAction", c, got.Action)
+		}
+	}
 }
