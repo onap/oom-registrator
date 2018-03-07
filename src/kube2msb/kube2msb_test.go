@@ -48,7 +48,7 @@ func urlFormateValidate(t *testing.T, method string) {
 		if method == "getMSBUrl" {
 			argMSBUrl = &c.in
 			got, _ = getMSBUrl()
-		} else {
+		} else if method == "getKubeMasterUrl" {
 			argKubeMasterUrl = &c.in
 			got, _ = getKubeMasterUrl()
 		}
@@ -58,6 +58,11 @@ func urlFormateValidate(t *testing.T, method string) {
 		}
 	}
 }
+
 func TestGetMSBUrl(t *testing.T) {
 	urlFormateValidate(t, "getMSBUrl")
+}
+
+func TestGetKubeMasterUrl(t *testing.T) {
+	urlFormateValidate(t, "getKubeMasterUrl")
 }
