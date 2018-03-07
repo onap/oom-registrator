@@ -118,3 +118,61 @@ func TestRegister(t *testing.T) {
 
 	client.Register(serviceInfo)
 }
+
+func TestDeRegister(t *testing.T) {
+	cases := []struct{ url, serviceInfo string }{
+		{ // Version is ""
+			urlPrefix + "/resgisterTest1/version/null/nodes/192.168.1.10/8080",
+			`[{
+				"ip":"192.168.1.10",
+				"port":"8080",
+				"serviceName":"resgisterTest1",
+				"version":"",
+				"url":"/register/test",
+				"protocol":"http",
+				"lb_policy":"random",
+				"visualRange":"1",
+				"path":"rt",
+				"enable_ssl":true
+			}]`,
+		}, { // version is not ""
+			urlPrefix + "/resgisterTest2/version/v1/nodes/192.168.1.10/8080",
+			`[{
+				"ip":"192.168.1.10",
+				"port":"8080",
+				"serviceName":"resgisterTest2",
+				"version":"v1",
+				"url":"/register/test",
+				"protocol":"http",
+				"lb_policy":"random",
+				"visualRange":"1",
+				"path":"rt",
+				"enable_ssl":true
+			}]`,
+		},
+	}
+
+	for _, c := range cases {
+		handler := func(res http.ResponseWriter, req *http.Request) {
+			if req.Method != "DELETE" {
+				t.Errorf("DeRegister() request method should be 'DELETE' not %s", req.Method)
+			} else if c.url != req.URL.String() {
+				t.Errorf("DeRegister() url should be %s, not %s", c.url, req.URL)
+			} else {
+				res.WriteHeader(200)
+				res.Header().Set("Content-Type", "application/xml")
+				fmt.Fprintln(res, "deregist success")
+			}
+
+		}
+		server := httptest.NewServer(http.HandlerFunc(handler))
+		defer server.Close()
+
+		client := MSBAgent{
+			url: server.URL,
+		}
+
+		client.DeRegister(c.serviceInfo)
+	}
+
+}
