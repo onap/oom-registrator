@@ -89,3 +89,24 @@ func TestSendServiceWork(t *testing.T) {
 		}
 	}
 }
+
+func TestSendPodWork(t *testing.T) {
+
+	kubeWorkQueue := make(chan KubeWork, 1)
+	podObj := kapi.Pod{}
+
+	cases := []KubeWorkAction{
+		KubeWorkAddPod,
+		KubeWorkRemovePod,
+		KubeWorkUpdatePod,
+	}
+
+	for _, c := range cases {
+		sendPodWork(c, kubeWorkQueue, &podObj)
+		got := <-kubeWorkQueue
+
+		if got.Action != c {
+			t.Errorf("sendPodWork(%action, queue, service) got %gotAction", c, got.Action)
+		}
+	}
+}
