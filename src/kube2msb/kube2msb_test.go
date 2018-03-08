@@ -205,3 +205,18 @@ func TestRunBookKeeper(t *testing.T) {
 		}
 	}
 }
+
+func TestNewKubeClient(t *testing.T) {
+	url := "http://192.168.1.2"
+	argKubeMasterUrl = &url
+	_, err := newKubeClient()
+	if err != nil {
+		t.Errorf("newKubeClient() error")
+	}
+
+	os.Setenv("AUTH_TOKEN", "autoToken1")
+	_, err2 := newKubeClient()
+	if err2 != nil {
+		t.Errorf("newKubeClient() error")
+	}
+}
