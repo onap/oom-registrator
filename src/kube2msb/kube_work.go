@@ -105,7 +105,7 @@ func (client *ClientBookKeeper) RemoveService(svc *kapi.Service) {
 		client.msbQueue <- MSBWork{
 			Action:      MSBWorkRemoveService,
 			ServiceInfo: svc.ObjectMeta.Annotations[serviceKey],
-			IPAddress:   svc.Spec.LoadBalancerIP,
+			IPAddress:   svc.Spec.ClusterIP,
 		}
 	} else {
 		log.Printf("Service Type:%s for Service:%s is not supported", svc.Spec.Type, svc.Name)
@@ -152,7 +152,7 @@ func (client *ClientBookKeeper) AddPod(pod *kapi.Pod) {
 		IPAddress:   pod.Status.PodIP,
 	}
 	client.pods[pod.Name] = pod
-	log.Println("Queued Pod to be added: ", pod.Name)
+	log.Println("Queued Pod to be added: ", pod.Name, pod.Status.PodIP)
 }
 
 func (client *ClientBookKeeper) RemovePod(pod *kapi.Pod) {
@@ -173,8 +173,8 @@ func (client *ClientBookKeeper) RemovePod(pod *kapi.Pod) {
 		ServiceInfo: pod.Annotations[serviceKey],
 		IPAddress:   client.pods[pod.Name].Status.PodIP,
 	}
+	log.Println("Queued Pod to be removed: ", pod.Name, client.pods[pod.Name].Status.PodIP)
 	delete(client.pods, pod.Name)
-	log.Println("Queued Pod to be removed: ", pod.Name)
 }
 
 func (client *ClientBookKeeper) UpdatePod(pod *kapi.Pod) {

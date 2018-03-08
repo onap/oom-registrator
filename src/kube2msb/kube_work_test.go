@@ -174,12 +174,12 @@ func createMockPod(name string, ip string) *kapi.Pod {
 	return &pod
 }
 
-func msbWorkPodValidate(t *testing.T, queue <-chan MSBWork, pod *kapi.Pod, action MSBWorkAction) {
+func msbWorkPodValidate(t *testing.T, queue <-chan MSBWork, pod *kapi.Pod, action MSBWorkAction, ip string) {
 	work := <-queue
 
-	if work.Action != action || work.IPAddress != pod.Status.PodIP || work.ServiceInfo != pod.Name {
-		t.Errorf("expect %s,%s,%s to be %s %s,%s",
-			work.Action, work.IPAddress, work.ServiceInfo, action, pod.Status.PodIP, pod.Name)
+	if work.Action != action || work.IPAddress != ip || work.ServiceInfo != pod.Name {
+		t.Errorf("expect %s,%s,%s to be %s, %s,%s",
+			work.Action, work.IPAddress, work.ServiceInfo, action, ip, pod.Name)
 	}
 }
 
@@ -191,7 +191,7 @@ func TestAddPodKube(t *testing.T) {
 	// add ServiceTypeClusterIP
 	pod := createMockPod("addPodTest", "192.168.10.10")
 	client.AddPod(pod)
-	msbWorkPodValidate(t, msbWorkQueue, pod, MSBWorkAddPod)
+	msbWorkPodValidate(t, msbWorkQueue, pod, MSBWorkAddPod, "192.168.10.10")
 	if _, ok := client.pods[pod.Name]; !ok {
 		t.Errorf("add pod error, pod not exists in client.pods")
 	}
@@ -239,9 +239,9 @@ func TestRemovePodKube(t *testing.T) {
 	if _, ok := client.pods[pod.Name]; !ok {
 		t.Errorf("add pod error, pod not exists in client.pods")
 	}
-	msbWorkPodValidate(t, msbWorkQueue, pod, MSBWorkAddPod)
+	msbWorkPodValidate(t, msbWorkQueue, pod, MSBWorkAddPod, "192.168.10.10")
 	client.RemovePod(pod)
-	msbWorkPodValidate(t, msbWorkQueue, pod, MSBWorkRemovePod)
+	msbWorkPodValidate(t, msbWorkQueue, pod, MSBWorkRemovePod, "192.168.10.10")
 	if _, ok := client.pods[pod.Name]; ok {
 		t.Errorf("remove pod error, pod still exists in client.pods")
 	}
@@ -261,16 +261,16 @@ func TestUpdatePodKube(t *testing.T) {
 	// update exist Pod
 	existPod := createMockPod("mockPod", "192.168.10.11")
 	client.AddPod(existPod)
-	msbWorkPodValidate(t, msbWorkQueue, existPod, MSBWorkAddPod)
+	msbWorkPodValidate(t, msbWorkQueue, existPod, MSBWorkAddPod, "192.168.10.11")
 	if _, ok := client.pods[existPod.Name]; !ok {
 		t.Errorf("add pod error, pod not exists in client.pods")
 	}
 	// update service info
-	existPod.Status.PodIP = "0.0.0.0"
-	client.UpdatePod(existPod)
-	msbWorkPodValidate(t, msbWorkQueue, existPod, MSBWorkRemovePod)
-	msbWorkPodValidate(t, msbWorkQueue, existPod, MSBWorkAddPod)
-	if updatedExistPod, ok := client.pods[existPod.Name]; !ok || updatedExistPod.Status.PodIP != existPod.Status.PodIP {
+	updatePod := createMockPod("mockPod", "0.0.0.0")
+	client.UpdatePod(updatePod)
+	msbWorkPodValidate(t, msbWorkQueue, updatePod, MSBWorkRemovePod, "192.168.10.11")
+	msbWorkPodValidate(t, msbWorkQueue, updatePod, MSBWorkAddPod, "0.0.0.0")
+	if updatedExistPod, ok := client.pods[existPod.Name]; !ok || updatedExistPod.Status.PodIP != updatePod.Status.PodIP {
 		t.Errorf("add pod error, pod not exists in client.pods")
 	}
 
@@ -280,7 +280,7 @@ func TestUpdatePodKube(t *testing.T) {
 		t.Errorf("mockNotExistPod should not exist before it has been added")
 	}
 	client.UpdatePod(notExistPod)
-	msbWorkPodValidate(t, msbWorkQueue, notExistPod, MSBWorkAddPod)
+	msbWorkPodValidate(t, msbWorkQueue, notExistPod, MSBWorkAddPod, "192.168.10.11")
 	if _, ok := client.pods[notExistPod.Name]; !ok {
 		t.Errorf("mockNotExistPod should not exist before it has been added")
 	}
