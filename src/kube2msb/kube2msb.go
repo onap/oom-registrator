@@ -36,6 +36,7 @@ import (
 var (
 	argMSBUrl        = flag.String("msb_url", "", "URL to MSB backend")
 	argKubeMasterUrl = flag.String("kube_master_url", "", "Url to reach kubernetes master. Env variables in this flag will be expanded.")
+	argAuthToken     = flag.String("auth_token", "", "Auth token for accessing Kube master.")
 	addMap           = make(map[string]*kapi.Pod)
 	deleteMap        = make(map[string]*kapi.Pod)
 	nodeSelector     = klabels.Everything()
@@ -92,7 +93,10 @@ func newKubeClient() (*kclient.Client, error) {
 	overrides := &kclientcmd.ConfigOverrides{}
 	overrides.ClusterInfo.Server = masterUrl
 
-	if token, present := os.LookupEnv("AUTH_TOKEN"); present {
+	if *argAuthToken != "" {
+		overrides.AuthInfo.Token = *argAuthToken
+		overrides.ClusterInfo.InsecureSkipTLSVerify = true
+	} else if token, present := os.LookupEnv("AUTH_TOKEN"); present {
 		overrides.AuthInfo.Token = token
 		overrides.ClusterInfo.InsecureSkipTLSVerify = true
 	}
