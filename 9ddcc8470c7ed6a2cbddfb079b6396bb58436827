@@ -1,0 +1,7 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+2: Borislav Glozman <Borislav.Glozman@amdocs.com>
+Submitted-by: Borislav Glozman <Borislav.Glozman@amdocs.com>
+Submitted-at: Wed, 21 Mar 2018 15:26:21 +0000
+Reviewed-on: https://gerrit.onap.org/r/36803
+Project: oom/registrator
+Branch: refs/heads/master
