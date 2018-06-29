@@ -199,13 +199,6 @@
 			"revisionTime": "2016-07-12T10:00:20Z"
 		},
 		{
-			"checksumSHA1": "sKheT5xw89Tbu2Q071FQO27CVmE=",
-			"origin": "k8s.io/kubernetes/vendor/github.com/juju/ratelimit",
-			"path": "github.com/juju/ratelimit",
-			"revision": "baa956b6864800c46094b68723bbe316c65035be",
-			"revisionTime": "2016-07-12T10:00:20Z"
-		},
-		{
 			"checksumSHA1": "Q2vw4HZBbnU8BLFt8VrzStwqSJg=",
 			"origin": "k8s.io/kubernetes/vendor/github.com/matttproud/golang_protobuf_extensions/pbutil",
 			"path": "github.com/matttproud/golang_protobuf_extensions/pbutil",
