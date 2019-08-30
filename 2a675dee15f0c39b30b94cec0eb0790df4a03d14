@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ff7b35b4_7962eba8",
+        "filename": "INFO.yaml",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 3213
+      },
+      "writtenOn": "2019-08-30T16:01:03Z",
+      "side": 1,
+      "message": "oom/registrator",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 23
+      },
+      "revId": "2a675dee15f0c39b30b94cec0eb0790df4a03d14",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
