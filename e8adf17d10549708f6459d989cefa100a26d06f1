@@ -1,0 +1,10 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+1: Eric Debeau <eric.debeau@orange.com>
+Code-Review+1: Rich Bennett <r.njengineer@gmail.com>
+Code-Review+1: Huabing Zhao <zhaohuabing@gmail.com>
+Code-Review+2: Morgan Richomme <morgan.richomme@orange.com>
+Submitted-by: Borislav Glozman <Borislav.Glozman@amdocs.com>
+Submitted-at: Tue, 03 Mar 2020 09:15:58 +0000
+Reviewed-on: https://gerrit.onap.org/r/c/oom/registrator/+/84981
+Project: oom/registrator
+Branch: refs/heads/master
