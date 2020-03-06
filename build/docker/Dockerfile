@@ -1,4 +1,4 @@
-FROM alpine:3.3
+FROM alpine:3.11
 COPY kube2msb /bin/
 
 RUN addgroup -g 1000 msb && \
