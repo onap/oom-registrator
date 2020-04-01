@@ -21,11 +21,25 @@
   <groupId>org.onap.oom</groupId>
   <artifactId>registrator</artifactId>
   <version>1.2.6-SNAPSHOT</version>
-  <packaging>mvn-golang</packaging>
 
   <name>oom-registrator</name>
   <description>Kube2msb registrator listens kubernetes events and register onap microservices to MSB.</description>
 
+  <properties>
+    <maven.build.timestamp.format>yyyyMMdd'T'HHmmss'Z'</maven.build.timestamp.format>
+    <dockerFileDir>build/docker</dockerFileDir>
+    <version.output>${project.basedir}/target/version</version.output>
+    <docker.image.name>onap/oom/kube2msb</docker.image.name>
+    <docker.tag>${project.version}-${maven.build.timestamp}</docker.tag>
+    <docker.latest.tag>${project.version}-latest</docker.latest.tag>
+  </properties>
+
+  <profiles>
+  <profile>
+  <id>linux</id>
+  <activation>
+      <activeByDefault>true</activeByDefault>
+  </activation>
   <build>
     <plugins>
       <plugin>
@@ -36,7 +50,7 @@
       <plugin>
           <groupId>com.igormaznitsa</groupId>
           <artifactId>mvn-golang-wrapper</artifactId>
-          <version>2.1.6</version>
+          <version>2.3.4</version>
           <extensions>true</extensions>
             <configuration>
               <disableSdkDownload>true</disableSdkDownload>
@@ -58,6 +72,7 @@
                 </goals>
                 <configuration>
                   <resultName>kube2msb</resultName>
+	          <resultFolder>${version.output}</resultFolder> 
                 </configuration>
               </execution>
               <execution>
@@ -77,7 +92,102 @@
               </execution>
             </executions>
         </plugin>
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>copy-resources-dockerfile</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>copy-resources</goal>
+              </goals>
+              <configuration>
+		<outputDirectory>${version.output}</outputDirectory>
+                <includeEmptyDirs>true</includeEmptyDirs>
+                <resources>
+                  <resource>
+                    <directory>${dockerFileDir}</directory>
+                    <filtering>false</filtering>
+                    <includes>
+                      <include>Dockerfile</include>
+                    </includes>
+                  </resource>
+                </resources>
+                <overwrite>true</overwrite>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
     </plugins>
   </build>
-
+</profile>
+ <profile>
+      <id>docker</id>
+      <build>
+          <plugins>
+               <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <version>0.19.1</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.github.jnr</groupId>
+                                <artifactId>jnr-unixsocket</artifactId>
+                                <version>0.13</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <verbose>true</verbose>
+                            <apiVersion>1.23</apiVersion>
+                            <registry>nexus3.onap.org:10003</registry>
+                            <images>
+                                <image>
+                                    <name>${docker.image.name}</name>
+                                    <alias>docker_kube2msb</alias>
+                                    <build>
+                                        <cleanup>true</cleanup>
+                                        <tags>
+                                            <tag>${docker.tag}</tag>
+                                            <tag>${docker.latest.tag}</tag>
+                                        </tags>
+                                        <dockerFileDir>${version.output}</dockerFileDir>
+                                    </build>
+                                </image>
+                            </images>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>clean-images</id>
+                                <phase>pre-clean</phase>
+                                <goals>
+                                    <goal>remove</goal>
+                                </goals>
+                                <configuration>
+                                    <removeAll>true</removeAll>
+                                    <image>docker_kube2msb</image>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>generate-images</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>push-images</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>push</goal>
+                                </goals>
+                                <configuration>
+                                    <image>${docker.image.name}</image>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+          </plugins>
+      </build>
+    </profile>
+</profiles>
 </project>
