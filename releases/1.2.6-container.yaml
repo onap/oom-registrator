@@ -1,0 +1,9 @@
+---
+distribution_type: container
+log_dir: oom-registrator-maven-docker-stage-master/11/
+project: oom-registrator
+container_release_tag: 1.2.6
+ref: ebbcd9464a7d465346a5d91609fbeafefb16d208 
+containers:
+    - name: 'oom/kube2msb'
+      version: '1.2.6-20200429T222438Z'
