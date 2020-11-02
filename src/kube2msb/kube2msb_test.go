@@ -85,7 +85,7 @@ func TestSendServiceWork(t *testing.T) {
 		got := <-kubeWorkQueue
 
 		if got.Action != c {
-			t.Errorf("sendServiceWork(%action, queue, service) got %gotAction", c, got.Action)
+			t.Errorf("sendServiceWork(%v, queue, service) got %v", c, got.Action)
 		}
 	}
 }
@@ -106,7 +106,7 @@ func TestSendPodWork(t *testing.T) {
 		got := <-kubeWorkQueue
 
 		if got.Action != c {
-			t.Errorf("sendPodWork(%action, queue, service) got %gotAction", c, got.Action)
+			t.Errorf("sendPodWork(%v, queue, service) got %v", c, got.Action)
 		}
 	}
 }

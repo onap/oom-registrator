@@ -155,20 +155,3 @@ func TestRemoveServiceMsb(t *testing.T) {
 func TestRemovePodMsb(t *testing.T) {
 	removeServiceOrPodTest(t, "Pod")
 }
-
-func TestMergeIP(t *testing.T) {
-	cases := []struct{ ip, sInfo, want string }{
-		{"127.0.0.1", "{}", "{\"ip\":\"127.0.0.1\",}"},
-		{"127.0.0.1", "[{}]", "[{\"ip\":\"127.0.0.1\",}]"},
-		{"127.0.0.1", "{\"name\":\"msb\"}", "{\"ip\":\"127.0.0.1\",\"name\":\"msb\"}"},
-		{"127.0.0.1", "{\"name\":\"msb\", \"child\":{\"name\":\"childname\"}}",
-			"{\"ip\":\"127.0.0.1\",\"name\":\"msb\", \"child\":{\"ip\":\"127.0.0.1\",\"name\":\"childname\"}}"},
-	}
-
-	for _, c := range cases {
-		got := mergeIP(c.ip, c.sInfo)
-		if got != c.want {
-			t.Errorf("mergeIP(%ip, %sInfo) == %got, want %want", c.ip, c.sInfo, got, c.want)
-		}
-	}
-}

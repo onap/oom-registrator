@@ -28,8 +28,8 @@ const (
 )
 
 type Client interface {
-	Register(string)
-	DeRegister(string)
+	Register(string, string)
+	DeRegister(string, string)
 }
 
 type MSBAgent struct {
@@ -51,7 +51,7 @@ func newMSBAgent(s string) (*MSBAgent, error) {
 	return &MSBAgent{url: s}, nil
 }
 
-func (client *MSBAgent) Register(serviceInfo string) {
+func (client *MSBAgent) Register(ip, serviceInfo string) {
 	var (
 		sas = []*ServiceAnnotation{}
 	)
@@ -62,6 +62,7 @@ func (client *MSBAgent) Register(serviceInfo string) {
 	}
 
 	for _, sa := range sas {
+		sa.IP = ip
 		su := ServiceAnnotation2ServiceUnit(sa)
 		body, _ := json.Marshal(su)
 		postURL := client.url + urlPrefix
@@ -76,7 +77,7 @@ func (client *MSBAgent) Register(serviceInfo string) {
 	}
 }
 
-func (client *MSBAgent) DeRegister(serviceInfo string) {
+func (client *MSBAgent) DeRegister(ip, serviceInfo string) {
 	var (
 		sas = []*ServiceAnnotation{}
 	)
@@ -88,6 +89,7 @@ func (client *MSBAgent) DeRegister(serviceInfo string) {
 	}
 
 	for _, sa := range sas {
+		sa.IP = ip
 		var deleteURL string
 		if sa.Version == "" {
 			deleteURL = client.url + urlPrefix + "/" + sa.ServiceName + "/version/" + "null" + "/nodes/" + sa.IP + "/" + sa.Port

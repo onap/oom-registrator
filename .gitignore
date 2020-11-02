@@ -14,3 +14,4 @@ pkg/
 *.zip
 *.tar
 *.gz
+src/kube2msb/kube2msb

@@ -67,14 +67,14 @@ func TestServiceAnnotation2ServiceUnit(t *testing.T) {
 	}
 	unit := ServiceAnnotation2ServiceUnit(&sa)
 
-	if unit.Name != sa.ServiceName || unit.Version != sa.Version || unit.URL != sa.URL || unit.Protocol != sa.Protocol || unit.LBPolicy != sa.LBPolicy || unit.LBPolicy != sa.LBPolicy || unit.Path != sa.Path || unit.EnableSSL != sa.EnableSSL || unit.Instances[0].ServiceIP != sa.IP || unit.Instances[0].ServicePort != sa.Port {
+	if unit.Name != sa.ServiceName || unit.Version != sa.Version || unit.URL != sa.URL || unit.Protocol != sa.Protocol || unit.LBPolicy != sa.LBPolicy || unit.Path != sa.Path || unit.EnableSSL != sa.EnableSSL || unit.Instances[0].ServiceIP != sa.IP || unit.Instances[0].ServicePort != sa.Port {
 		t.Errorf("ServiceAnnotation2ServiceUnit error")
 	}
 }
 
 func TestRegister(t *testing.T) {
+	ip := "192.168.1.10"
 	serviceInfo := `[{
-		"ip":"192.168.1.10",
 		"port":"8080",
 		"serviceName":"resgisterTest",
 		"version":"v1",
@@ -116,15 +116,15 @@ func TestRegister(t *testing.T) {
 		url: server.URL,
 	}
 
-	client.Register(serviceInfo)
+	client.Register(ip, serviceInfo)
 }
 
 func TestDeRegister(t *testing.T) {
+	ip := "192.168.1.10"
 	cases := []struct{ url, serviceInfo string }{
 		{ // Version is ""
 			urlPrefix + "/resgisterTest1/version/null/nodes/192.168.1.10/8080",
 			`[{
-				"ip":"192.168.1.10",
 				"port":"8080",
 				"serviceName":"resgisterTest1",
 				"version":"",
@@ -138,7 +138,6 @@ func TestDeRegister(t *testing.T) {
 		}, { // version is not ""
 			urlPrefix + "/resgisterTest2/version/v1/nodes/192.168.1.10/8080",
 			`[{
-				"ip":"192.168.1.10",
 				"port":"8080",
 				"serviceName":"resgisterTest2",
 				"version":"v1",
@@ -172,7 +171,7 @@ func TestDeRegister(t *testing.T) {
 			url: server.URL,
 		}
 
-		client.DeRegister(c.serviceInfo)
+		client.DeRegister(ip, c.serviceInfo)
 	}
 
 }

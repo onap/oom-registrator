@@ -17,7 +17,6 @@ package main
 
 import (
 	"log"
-	"strings"
 	"sync"
 )
 
@@ -49,7 +48,7 @@ func (client *MSBAgentWorker) AddService(ip, sInfo string) {
 		return
 	}
 
-	client.agent.Register(mergeIP(ip, sInfo))
+	client.agent.Register(ip, sInfo)
 }
 
 func (client *MSBAgentWorker) RemoveService(ip, sInfo string) {
@@ -61,7 +60,7 @@ func (client *MSBAgentWorker) RemoveService(ip, sInfo string) {
 		return
 	}
 
-	client.agent.DeRegister(mergeIP(ip, sInfo))
+	client.agent.DeRegister(ip, sInfo)
 }
 
 func (client *MSBAgentWorker) AddPod(ip, sInfo string) {
@@ -72,7 +71,7 @@ func (client *MSBAgentWorker) AddPod(ip, sInfo string) {
 		return
 	}
 
-	client.agent.Register(mergeIP(ip, sInfo))
+	client.agent.Register(ip, sInfo)
 }
 
 func (client *MSBAgentWorker) RemovePod(ip, sInfo string) {
@@ -83,15 +82,5 @@ func (client *MSBAgentWorker) RemovePod(ip, sInfo string) {
 		return
 	}
 
-	client.agent.DeRegister(mergeIP(ip, sInfo))
-}
-
-func mergeIP(ip, sInfo string) string {
-	insert := "{\"ip\":\"" + ip + "\","
-	parts := strings.Split(sInfo, "{")
-	out := parts[0]
-	for i := 1; i < len(parts); i++ {
-		out += insert + parts[i]
-	}
-	return out
+	client.agent.DeRegister(ip, sInfo)
 }
