@@ -1,4 +1,5 @@
-# UUID                                                                          	Group Name
+# UUID                                  	Group Name
 #
-daebbf523be390041a1a9c0e340a6d833aae5043                                        	GitHub Replication
-fe2423de54d291e3f698139a071f223a4cfaefe1                                        	saml/onap-gerrit-oom-registrator-committers
+5097f9d988070cc7f1dabdc48938c54b4fbde3b3	saml/onap-gitlab-read-only
+daebbf523be390041a1a9c0e340a6d833aae5043	GitHub Replication
+fe2423de54d291e3f698139a071f223a4cfaefe1	saml/onap-gerrit-oom-registrator-committers
