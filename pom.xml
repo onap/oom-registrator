@@ -53,7 +53,21 @@
           <version>2.3.4</version>
           <extensions>true</extensions>
             <configuration>
-              <disableSdkDownload>true</disableSdkDownload>
+              <!-- The plugin normally discovers the SDK by listing the bucket at
+                   sdkSite (https://storage.googleapis.com/golang/). Google has since
+                   revoked anonymous storage.objects.list on that bucket, so discovery
+                   fails with 403 Forbidden. Naming the archive directly makes the
+                   plugin skip the listing and fetch from Google's current download
+                   host instead. Matches targetOs/targetArch below. -->
+              <sdkDownloadUrl>https://dl.google.com/go/go1.9.linux-amd64.tar.gz</sdkDownloadUrl>
+              <!-- The plugin verifies downloads via the x-goog-hash response header,
+                   which only the (now inaccessible) storage.googleapis.com bucket
+                   emitted; dl.google.com does not send it, so the check fails with
+                   "Parsed x-goog-hash has not needed data". No reachable host serves
+                   both the archive and that header, so verification is disabled here.
+                   Sourcing the SDK from the build image instead of downloading it
+                   would remove this trade-off. -->
+              <checkSdkHash>false</checkSdkHash>
               <goVersion>1.9</goVersion>
               <useEnvVars>true</useEnvVars>
               <env>
